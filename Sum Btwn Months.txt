@@ -1,0 +1,9 @@
+=IFERROR(=IF(AND(DATEDIF(HLOOKUP($F7, $N$2:$Z$3, 2, 0),N$3, "M"), DATEDIF(N$3, HLOOKUP($G7, $N$2:$Z$3, 2, 0), "M")), $H7, $H7), 0)
+
+$N$2:$Z$3 	-> Month range (Jan-Dec) on row 2 and Date format below on row 3
+$F7 		-> Start Month (String format-> "Jan")
+N$3		-> Current column month date
+$G7		-> End Month
+$H7		-> Recurring number
+
+

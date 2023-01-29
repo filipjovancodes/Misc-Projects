@@ -1,0 +1,84 @@
+Sub OTD()
+
+    ' Disable screen updating to make macro faster
+    Application.ScreenUpdating = False
+    ' Import Variables
+    Dim Import_data As String ' Receive import data as a string
+    Dim Import_col_start As Integer ' Numerical number of column to start importing at
+    Dim Import_col_end As Integer ' Numberical number of column to stop importing at
+    Dim Import_row_start As Integer ' Import row start to move through columns
+    Dim Import_row_end As Integer ' Import row end to move through columns
+    ' Local File Variables
+    Dim col_start As Integer ' Column number to begin pasting data
+    Dim col_end As Integer ' Column number to stop pasting data
+    Dim row_start As Integer ' row to start pasting data
+    Dim row_end As Integer
+    
+    Dim JDE As String
+    Dim OTD As String
+    JDE = "C:\Users\Filip\OneDrive\Documents\Career\VBA Automation\jde.xlsx"
+    OTD = "C:\Users\Filip\OneDrive\Documents\Career\VBA Automation\data.xlsm"
+    
+    Import_col_start = 1
+    Import_col_end = 19
+    
+    col_start = 2
+    col_end = 20
+    row_start = 6
+    row_end = 10000
+    
+    ' Clear Contents in data file
+    ' Range("B6:T10000").Delete
+    
+    ' Paste JDE file path here
+    Set JDE_file = Workbooks.Open(JDE)
+    
+    ' Get previous month + year (Row 1 Col E in JDE file) for filtering data
+    Dim Cur_Date As Date
+    Dim Import_Date As Date
+    Cur_Date = JDE_file.Worksheets(1).Cells(1, 5).Value
+    Cur_Month = Month(Cur_Date) - 1
+    If Cur_Month = 1 Then
+        Cur_Year = Year(Cur_Date) - 1
+    Else
+        Cur_Year = Year(Cur_Date)
+    End If
+    
+    ' Filter JDE file data based on Cur_Month + Cur_Year
+    ' import_row_start = first data entry with Cur_month + cur_year in column S
+    Dim isRunning As Boolean
+    Dim isPastStart As Boolean
+    isRunning = True
+    isPastStart = False
+    ' Start search at row 4
+    Import_row_start = 4
+    Import_row_end = 4
+    ' Search column S (19) for first data entry with current month and current year
+    While isRunning = True
+        Import_Date = JDE_file.Worksheets(1).Cells(Import_row_end, 19).Value
+        
+        If Month(Import_Date) = Cur_Month And Year(Import_Date) = Cur_Year Then
+            isPastStart = True
+            Import_row_start = Import_row_start - 1
+        End If
+        
+        If (isPastStart And Not Month(Import_Date) = Cur_Month And Not Year(Import_Date) = Cur_Year) Or IsEmpty(Import_Date) Then
+            isRunning = False
+            Import_row_end = Import_row_end - 1
+            Import_row_start = Import_row_start - 1
+        End If
+
+        Import_row_start = Import_row_start + 1
+        Import_row_end = Import_row_end + 1
+    Wend
+    
+    Range(JDE_file.Worksheets(1).Cells(Import_row_start, Import_col_start), JDE_file.Worksheets(1).Cells(Import_row_end, Import_col_end)).Copy
+    
+    ' Paste OTD file path here
+    Set OTD_file = Workbooks.Open(OTD)
+    
+    Range(OTD_file.Worksheets(2).Cells(row_start, col_start), OTD_file.Worksheets(2).Cells(row_end, col_end)).PasteSpecial
+
+    Application.ScreenUpdating = True
+    
+End Sub
